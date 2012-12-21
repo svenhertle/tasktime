@@ -13,12 +13,17 @@ import datetime
 class Calculator:
     printer = None
 
+    task_cmd = "task"
+
     def __init__(self):
         self.printer = ReadablePrinter()
 
 
     def setPrinter(self, printer):
         self.printer = printer
+
+    def setTaskCmd(self, task_cmd):
+        self.task_cmd = task_cmd
 
     def create_statistic(self, project):
         if self.printer == None:
@@ -27,7 +32,10 @@ class Calculator:
 
         # Get data from taskwarrior
         try:
-            json_tmp = subprocess.check_output(["task", "export", "pro:" + project])
+            json_tmp = subprocess.check_output([self.task_cmd, "export", "pro:" + project])
+        except OSError as e:
+            print(str(e))
+            sys.exit(1)
         except subprocess.CalledProcessError as e:
             print("Export from taskwarrior fails: " + str(e.output, encoding="utf8"))
             sys.exit(1)
@@ -152,11 +160,17 @@ class ReadablePrinter(Printer):
 def print_help():
     print(sys.argv[0] + " [parameters...] <project>")
     print()
+    print("Calculate and print time for a project from taskwarrior")
+    print()
     print("Parameters:")
-    print("\t-h, --help\tShow this help")
-    print("\t-c, --csv\tPrint output in CSV format")
+    print("\t-h, --help\t\tShow this help")
+    print("\t-c, --csv\t\tPrint output in CSV format")
+    print("\t-t, --task [cmd]\tSet task command")
 
+#
 # Main
+#
+
 if __name__ == "__main__":
     params = sys.argv[1:]
     
@@ -165,12 +179,24 @@ if __name__ == "__main__":
     project = None
     show_help = False
 
+    skip = False
     for i,param in enumerate(params):
+        if skip:
+            skip = False
+            continue
+
         if param == "--csv" or param == "-c":
             c.setPrinter(CSVPrinter())
         elif param == "--help" or param == "-h":
             show_help = True
-        elif i == len(params)-1:
+        elif param == "--task" or param == "-t":
+            if i == len(params)-1: # Last parameter -> error
+                print("--task needs another parameter")
+                sys.exit(1)
+            else:
+                c.setTaskCmd(params[i+1])
+                skip = True
+        elif i == len(params)-1: # Last parameter
             project = param
 
     if show_help or project == None:
