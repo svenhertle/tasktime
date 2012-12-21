@@ -15,15 +15,19 @@ class Calculator:
 
     task_cmd = "task"
 
+    print_null = False
+
     def __init__(self):
         self.printer = ReadablePrinter()
-
 
     def setPrinter(self, printer):
         self.printer = printer
 
     def setTaskCmd(self, task_cmd):
         self.task_cmd = task_cmd
+    
+    def setPrintNull(self, print_null):
+        self.print_null = print_null
 
     def create_statistic(self, project):
         if self.printer == None:
@@ -57,7 +61,8 @@ class Calculator:
             tmp_seconds = self.get_task_time(t)
             seconds += tmp_seconds
 
-            self.printer.print_task(t["description"], tmp_seconds)
+            if self.print_null or tmp_seconds != 0:
+                self.printer.print_task(t["description"], tmp_seconds)
 
         return seconds
 
@@ -165,6 +170,7 @@ def print_help():
     print("Parameters:")
     print("\t-h, --help\t\tShow this help")
     print("\t-c, --csv\t\tPrint output in CSV format")
+    print("\t-n, --null\t\tPrint todos without time information (default: no)")
     print("\t-t, --task [cmd]\tSet task command")
 
 #
@@ -196,6 +202,8 @@ if __name__ == "__main__":
             else:
                 c.setTaskCmd(params[i+1])
                 skip = True
+        elif param == "--null" or param == "-n":
+            c.setPrintNull(True)
         elif i == len(params)-1: # Last parameter
             project = param
 
