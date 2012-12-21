@@ -6,94 +6,25 @@ import json
 import re
 import datetime
 
+#
 # Calculations
-def handle_tasks(tasks):
-    seconds = 0
-    for t in tasks:
-        tmp_seconds = get_task_time(t)
-        seconds += tmp_seconds
+#
 
-        print_task(t["description"], tmp_seconds)
+class Calculator:
+    printer = None
 
-    return seconds
+    def __init__(self):
+        self.printer = ReadablePrinter()
 
-def get_task_time(task):
-    seconds = 0
 
-    last_start = ""
-    if "annotations" in task:
-        annotations = task["annotations"]
-        for a in annotations:
-            if a["description"] == "Started task":
-                last_start = a["entry"]
-            elif a["description"] == "Stopped task":
-                seconds += calc_time_delta(last_start, a["entry"])
+    def setPrinter(self, printer):
+        self.printer = printer
 
-    return seconds
+    def create_statistic(self, project):
+        if self.printer == None:
+            print("Printer is None")
+            sys.exit(1)
 
-def calc_time_delta(start, stop):
-    start_time = internal_to_datetime(start)
-    stop_time = internal_to_datetime(stop)
-
-    delta = stop_time - start_time
-
-    return delta.total_seconds()
-
-def internal_to_datetime(string):
-    match = re.search("^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$", string)
-
-    if match == None:
-        return None
-
-    year = int(match.group(1))
-    month = int(match.group(2))
-    day = int(match.group(3))
-    
-    hour = int(match.group(4))
-    minute = int(match.group(5))
-    second = int(match.group(6))
-
-    return datetime.datetime(year, month, day, hour, minute, second)
-
-# Ouput
-def seconds_to_readable(seconds):
-    second = seconds % 60
-    minute = (seconds // 60) % 60
-    hour = (seconds // 3600)
-
-    return number_to_2_digits(hour) + ":" + number_to_2_digits(minute) + ":" + number_to_2_digits(second)
-
-def number_to_2_digits(n):
-    return repr(round(n)).zfill(2)
-
-# Prints
-
-def print_header(project):
-    print("Project: " + project)
-    print()
-    print("\"Beschreibung\",\"Dauer\"")
-
-def print_task(description, seconds):
-    print("\"" + description.replace("\"", "\"\"") + "\",\"" + seconds_to_readable(seconds) + "\"")
-
-def print_result(seconds):
-    print("\"\",\"\"")
-    print("\"Sum\",\"" + seconds_to_readable(seconds) + "\"")
-
-def print_help():
-    print(sys.argv[0] + " <project>")
-
-# Main
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print_help()
-        sys.exit(1)
-
-    project = sys.argv[1]
-
-    if project == "help":
-        print_help()
-    else:
         # Get data from taskwarrior
         try:
             json_tmp = subprocess.check_output(["task", "export", "pro:" + project])
@@ -108,6 +39,141 @@ if __name__ == "__main__":
         tasks = json.loads(json_str)
 
         # Print data
-        print_header(project)
-        time = handle_tasks(tasks)
-        print_result(time)
+        self.printer.print_header(project)
+        time = self.handle_tasks(tasks)
+        self.printer.print_result(time)
+
+    def handle_tasks(self, tasks):
+        seconds = 0
+        for t in tasks:
+            tmp_seconds = self.get_task_time(t)
+            seconds += tmp_seconds
+
+            self.printer.print_task(t["description"], tmp_seconds)
+
+        return seconds
+
+    def get_task_time(self, task):
+        seconds = 0
+
+        last_start = ""
+        if "annotations" in task:
+            annotations = task["annotations"]
+            for a in annotations:
+                if a["description"] == "Started task":
+                    last_start = a["entry"]
+                elif a["description"] == "Stopped task":
+                    seconds += self.calc_time_delta(last_start, a["entry"])
+
+        return seconds
+
+    def calc_time_delta(self, start, stop):
+        start_time = self.internal_to_datetime(start)
+        stop_time = self.internal_to_datetime(stop)
+
+        delta = stop_time - start_time
+
+        return delta.total_seconds()
+
+    def internal_to_datetime(self, string):
+        match = re.search("^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$", string)
+
+        if match == None:
+            return None
+
+        year = int(match.group(1))
+        month = int(match.group(2))
+        day = int(match.group(3))
+        
+        hour = int(match.group(4))
+        minute = int(match.group(5))
+        second = int(match.group(6))
+
+        return datetime.datetime(year, month, day, hour, minute, second)
+
+#
+# Printer
+#
+
+class Printer:
+    def print_header(self, project):
+        raise NotImplementedError()
+    
+    def print_task(self, description, seconds):
+        raise NotImplementedError()
+    
+    def print_result(self, seconds):
+        raise NotImplementedError()
+
+    def seconds_to_readable(self, seconds):
+        second = seconds % 60
+        minute = (seconds // 60) % 60
+        hour = (seconds // 3600)
+
+        return self._number_to_2_digits(hour) + ":" + self._number_to_2_digits(minute) + ":" + self._number_to_2_digits(second)
+
+    def _number_to_2_digits(self, n):
+        return repr(round(n)).zfill(2)
+
+# CSV
+class CSVPrinter(Printer):
+    def _csv_encode(self, string):
+        return string.replace("\"", "\"\"")
+
+    def print_header(self, project):
+        print("\"Project\",\"" + self._csv_encode(project) + "\"")
+        print("\"\",\"\"")
+        print("\"Description\",\"Duration (hours)\"")
+        print("\"\",\"\"")
+
+    def print_task(self, description, seconds):
+        print("\"" + self._csv_encode(description) + "\",\"" + self.seconds_to_readable(seconds) + "\"")
+
+    def print_result(self, seconds):
+        print("\"\",\"\"")
+        print("\"Sum\",\"" + self.seconds_to_readable(seconds) + "\"")
+
+# Readable
+class ReadablePrinter(Printer):
+    def print_header(self, project):
+        print("Project: " + project)
+        print()
+
+    def print_task(self, description, seconds):
+        print(description)
+        if seconds != 0:
+            print("\tDuration: " + self.seconds_to_readable(seconds))
+
+    def print_result(self, seconds):
+        print()
+        print("Sum: " + self.seconds_to_readable(seconds))
+
+# Help
+def print_help():
+    print(sys.argv[0] + " [parameters...] <project>")
+    print()
+    print("Parameters:")
+    print("\t-h, --help\tShow this help")
+    print("\t-c, --csv\tPrint output in CSV format")
+
+# Main
+if __name__ == "__main__":
+    params = sys.argv[1:]
+    
+    c = Calculator()
+
+    project = None
+    show_help = False
+
+    for i,param in enumerate(params):
+        if param == "--csv" or param == "-c":
+            c.setPrinter(CSVPrinter())
+        elif param == "--help" or param == "-h":
+            show_help = True
+        elif i == len(params)-1:
+            project = param
+
+    if show_help or project == None:
+        print_help()
+    else:
+        c.create_statistic(project)
