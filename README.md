@@ -27,7 +27,7 @@ Example:
 
     task 2 start
 
-    Work on task 2...
+    # Work on task 2...
 
     task 2 stop
 
