@@ -80,9 +80,9 @@ Output:
     "",""
     "Sum","02:31:40"
 
-Contact
--------
+Contact and Copyright
+---------------------
 
-Sven Hertle
+Sven Hertle <<sven.hertle@googlemail.com>>
 
-<sven.hertle@googlemail.com>
+tasktime is distributed under the MIT license. See [http://www.opensource.org/licenses/MIT](http://www.opensource.org/licenses/MIT) for more information.
