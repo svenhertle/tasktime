@@ -170,8 +170,8 @@ def print_help():
     print("Parameters:")
     print("\t-h, --help\t\tShow this help")
     print("\t-c, --csv\t\tPrint output in CSV format")
-    print("\t-n, --null\t\tPrint also todos without time information (default: no)")
-    print("\t-t, --task [cmd]\tSet task command")
+    print("\t-n, --null\t\tPrint also tasks without time information (default: no)")
+    print("\t-t, --task [cmd]\tChange task command")
 
 #
 # Main

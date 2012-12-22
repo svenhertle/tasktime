@@ -1,7 +1,7 @@
 tasktime
 ========
 
-*tasktime* reads the information of a project from taskwarrior and calculates, how much time was spent with this project.
+*tasktime* reads information of a project from [taskwarrior](http://www.taskwarrior.org) and calculates, how much time was spent with this project.
 *tasktime* can print CSV or readable output.
 
 Usage
@@ -9,15 +9,15 @@ Usage
 
     ./tasktime.py [parameters...] <project>
 
-**Parameters**
+### Parameters
 
     -h, --help              Show help message
     -c, --csv               Print output in CSV format
-    -n, --null              Print also todos without time information (default: no)
-    -t, --task [cmd]        Set task command
+    -n, --null              Print also tasks without time information (default: no)
+    -t, --task [cmd]        Change task command
 
-Save time with taskwarrior
--------------------------
+Note time with taskwarrior
+--------------------------
 
 taskwarrior has the operations *start* and *stop*.
 This information is used to calculate the spent time.
@@ -34,7 +34,7 @@ Example:
 Examples
 --------
 
-**Default output**
+### Default output
 
     ./tasktime.py cool-project
 
@@ -49,7 +49,7 @@ Output:
 
     Sum: 02:31:40
     
-**Print also tasks without time**
+### Print also tasks without time
     
     ./tasktime.py -n cool-project
 
@@ -64,3 +64,25 @@ Output:
         Duration: 02:18:35
 
     Sum: 02:31:40
+
+### CSV output
+
+    ./tasktime.py -c cool-project
+
+Output:
+
+    "Project","cool-project"
+    "",""
+    "Description","Duration (hours)"
+    "",""
+    "Do something cool","00:13:05"
+    "Do something really cool","02:18:35"
+    "",""
+    "Sum","02:31:40"
+
+Contact
+-------
+
+Sven Hertle
+
+<sven.hertle@googlemail.com>
