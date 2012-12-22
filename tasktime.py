@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# Copyright (c) 2012 Sven Hertle <sven.hertle@googlemail.com>
+
 import sys
 import subprocess
 import json

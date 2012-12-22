@@ -80,7 +80,7 @@ Output:
     "",""
     "Sum","02:31:40"
 
-Contact and Copyright
+Contact and copyright
 ---------------------
 
 Sven Hertle <<sven.hertle@googlemail.com>>
