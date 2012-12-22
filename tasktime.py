@@ -167,7 +167,7 @@ class ReadablePrinter(Printer):
 def print_help():
     print(sys.argv[0] + " [parameters...] <project>")
     print()
-    print("Calculate and print time for a project from taskwarrior")
+    print("Calculate and print spent time for a project from taskwarrior")
     print()
     print("Parameters:")
     print("\t-h, --help\t\tShow this help")
