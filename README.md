@@ -16,6 +16,13 @@ Usage
     -n, --null              Print also tasks without time information (default: no)
     -t, --task [cmd]        Change task command
 
+Prepare taskwarrior
+-------------------
+
+You have to add `journal.time=on` to your taskwarrior configuration (`.taskrc`).
+Taskwarrior will save start and stop annotations from now on.
+This annotations are evaluated by tasktime.
+
 Note time with taskwarrior
 --------------------------
 
