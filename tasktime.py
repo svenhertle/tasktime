@@ -38,7 +38,11 @@ class Calculator:
 
         # Get data from taskwarrior
         try:
-            json_tmp = subprocess.check_output([self.task_cmd, "export", "pro:" + project])
+            json_tmp = subprocess.check_output([self.task_cmd, 
+                                                "export", 
+                                                "pro:" + project,
+                                                "rc.json.array=on",
+                                               ])
         except OSError as e:
             print(str(e))
             sys.exit(1)
@@ -47,7 +51,7 @@ class Calculator:
             sys.exit(1)
 
         # Make valid JSON
-        json_str="[" + str(json_tmp, encoding="utf8") + "]"
+        json_str=str(json_tmp, encoding="utf8")
 
         # Parse JSON
         tasks = json.loads(json_str)
